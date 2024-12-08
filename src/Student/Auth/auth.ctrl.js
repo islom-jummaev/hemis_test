@@ -1,0 +1,110 @@
+const axios = require("axios");
+const jwt = require("jsonwebtoken");
+const UserModel = require("../../Models/user.model");
+
+// Tashqi so'rov yuborish (login)
+async function sendLoginRequest(login, password, next) {
+    const url = "https://stdmau.hemis.uz/rest/v1/auth/login";
+    const data = { login, password };
+    const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.Authorization}`,
+    };
+
+    try {
+        const response = await axios.post(url, data, { headers });
+
+        if (response.data.success) {
+            return response.data.data.token; // Tokenni qaytarish
+        } else {
+            throw new Error("Login failed on external server.");
+        }
+    } catch (error) {
+        return handleAxiosError(error, next);
+    }
+}
+
+// Profildan ma'lumot olish
+async function fetchProfileData(token, next) {
+    const url = `${process.env.BASE_URL}/account/me`;
+    const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+    };
+
+    try {
+        const response = await axios.get(url, { headers });
+
+        if (response.data.success) {
+            return response.data.data; // Profil ma'lumotlarini qaytarish
+        } else {
+            throw new Error("Failed to fetch profile data from external server.");
+        }
+    } catch (error) {
+        return handleAxiosError(error, next);
+    }
+}
+
+// Xatolarni boshqarish
+function handleAxiosError(error, next) {
+    if (error.response) {
+        const err = new Error(
+            error.response.data.message || "Error occurred while contacting external server."
+        );
+        err.status = error.response.status || 400;
+        return next(err);
+    } else if (error.request) {
+        const err = new Error("No response received from the external server.");
+        err.status = 500;
+        return next(err);
+    } else {
+        const err = new Error("Error occurred while setting up the request.");
+        err.status = 500;
+        return next(err);
+    }
+}
+
+// Login funksiyasi
+exports.login = async (req, res, next) => {
+    try {
+        const { login, password } = req.body;
+
+        // Foydalanuvchini bazadan izlash
+        let user = await UserModel.findOne({ login });
+
+        // Agar foydalanuvchi mavjud bo‘lmasa, uni yaratish
+        if (!user) {
+            user = await UserModel.create({ login });
+        }
+
+        // Tashqi serverga login so'rovi yuborish
+        const token = await sendLoginRequest(login, password, next);
+
+        if (token) {
+            // Profil ma'lumotlarini olish
+            const profileData = await fetchProfileData(token, next);
+
+            // Foydalanuvchini yangilash
+            user = await UserModel.findOneAndUpdate(
+                { login },
+                { token, student: profileData },
+                { new: true }
+            );
+
+            // JWT token yaratish
+            const jwtToken = jwt.sign({ _id: user._id }, "hemis_secret123");
+
+            return res.status(200).json({
+                success: true,
+                message: "Login successful",
+                token: jwtToken,
+                student: user.student, // Profil ma'lumotlarini qaytarish
+            });
+        } else {
+            return res.status(400).json({ success: false, message: "Login failed" });
+        }
+    } catch (error) {
+        console.error("Error:", error.message || error);
+        return next(error);
+    }
+};
