@@ -29,19 +29,6 @@ exports.index = async (req, res, next) => {
     }
 }
 
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * Starts the test by retrieving the test details with populated questions.
- * 
- * @param {Object} req - The request object containing parameters.
- * @param {Object} res - The response object for sending the test data.
- * @param {Function} next - The next middleware function in the stack.
- * 
- * @returns {void} Sends a JSON response with the test details.
- * 
- * @throws Calls next with an error if any occurs during the process.
- */
-/******  2bb8b03e-7bbd-4716-b198-291cc4f4573e  *******/
 exports.start = async (req, res, next) => {
     try {
         const { _id } = req.params

@@ -48,21 +48,28 @@ async function fetchProfileData(token, next) {
 // Xatolarni boshqarish
 function handleAxiosError(error, next) {
     if (error.response) {
+        console.error(
+            "Response Error:",
+            error.response.data || "No additional error information"
+        );
         const err = new Error(
             error.response.data.message || "Error occurred while contacting external server."
         );
         err.status = error.response.status || 400;
         return next(err);
     } else if (error.request) {
+        console.error("Request Error: No response received from the external server.");
         const err = new Error("No response received from the external server.");
         err.status = 500;
         return next(err);
     } else {
+        console.error("Setup Error:", error.message || "Unknown error occurred.");
         const err = new Error("Error occurred while setting up the request.");
         err.status = 500;
         return next(err);
     }
 }
+
 
 // Login funksiyasi
 exports.login = async (req, res, next) => {
