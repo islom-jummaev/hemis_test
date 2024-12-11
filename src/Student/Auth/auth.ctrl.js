@@ -6,6 +6,7 @@ const UserModel = require("../../Models/user.model");
 async function sendLoginRequest(login, password, next) {
     const url = "https://stdmau.hemis.uz/rest/v1/auth/login";
     const data = { login, password };
+    console.log(data);
     const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.Authorization}`,
@@ -17,6 +18,7 @@ async function sendLoginRequest(login, password, next) {
         if (response.data.success) {
             return response.data.data.token; // Tokenni qaytarish
         } else {
+            console.log("Hemis login", response)
             throw new Error("Login failed on external server.");
         }
     } catch (error) {
