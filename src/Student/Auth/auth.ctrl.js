@@ -9,7 +9,7 @@ async function sendLoginRequest(login, password, next) {
     console.log(data);
     const headers = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.Authorization}`,
+        Authorization: `${process.env.Authorization}`,
     };
 
     try {
