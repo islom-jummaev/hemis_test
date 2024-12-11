@@ -20,6 +20,7 @@ async function sendLoginRequest(login, password, next) {
             throw new Error("Login failed on external server.");
         }
     } catch (error) {
+        console.log("sendLoginRequest", error)
         return handleAxiosError(error, next);
     }
 }
@@ -41,6 +42,7 @@ async function fetchProfileData(token, next) {
             throw new Error("Failed to fetch profile data from external server.");
         }
     } catch (error) {
+        console.log("fetchProfileData", error)
         return handleAxiosError(error, next);
     }
 }
@@ -111,7 +113,7 @@ exports.login = async (req, res, next) => {
             return res.status(400).json({ success: false, message: "Login failed" });
         }
     } catch (error) {
-        console.error("Error:", error.message || error);
+        console.error("Login Error:", error.message || error);
         return next(error);
     }
 };

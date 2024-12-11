@@ -6,4 +6,5 @@ app.use("/auth", require("./Auth/auth.route"))
 app.use("/profile", AuthMiddleware, require("./Profile/profile.route"))
 app.use("/test", AuthMiddleware, require("./Test/test.route"))
 
+
 module.exports = app
