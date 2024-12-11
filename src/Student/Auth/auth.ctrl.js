@@ -88,15 +88,15 @@ exports.login = async (req, res, next) => {
 
         // Tashqi serverga login so'rovi yuborish
         const token = await sendLoginRequest(login, password, next);
-
+        console.log(token)
         if (token) {
             // Profil ma'lumotlarini olish
-            const profileData = await fetchProfileData(token, next);
+            // const profileData = await fetchProfileData(token, next);
 
             // Foydalanuvchini yangilash
             user = await UserModel.findOneAndUpdate(
                 { login },
-                { token, student: profileData },
+                { token },
                 { new: true }
             );
 
